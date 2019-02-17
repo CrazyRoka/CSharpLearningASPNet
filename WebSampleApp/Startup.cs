@@ -28,6 +28,48 @@ namespace WebSampleApp
 
             app.UseStaticFiles();
 
+            app.Map("/RequestAndResponse", app1 =>
+            {
+                app1.Run(async context =>
+                {
+                    context.Response.ContentType = "text/html";
+                    string result = string.Empty;
+
+                    switch (context.Request.Path.Value.ToLower())
+                    {
+                        case "/header":
+                            result = RequestAndResponse.GetHeaderInformation(context.Request);
+                            break;
+                        case "/add":
+                            result = RequestAndResponse.QueryString(context.Request);
+                            break;
+                        case "/content":
+                            result = RequestAndResponse.Content(context.Request);
+                            break;
+                        case "/encoded":
+                            result = RequestAndResponse.ContentEncoded(context.Request);
+                            break;
+                        case "/form":
+                            result = RequestAndResponse.GetForm(context.Request);
+                            break;
+                        case "/writecookie":
+                            result = RequestAndResponse.WriteCookie(context.Response);
+                            break;
+                        case "/readcookie":
+                            result = RequestAndResponse.ReadCookie(context.Request);
+                            break;
+                        case "/json":
+                            result = RequestAndResponse.GetJson(context.Response);
+                            break;
+                        default:
+                            result = RequestAndResponse.GetRequestInformation(context.Request);
+                            break;
+                    }
+
+                    await context.Response.WriteAsync(result);
+                });
+            });
+
             app.Run(async (context) =>
             {
                 // await context.Response.WriteAsync("Hello World!");
