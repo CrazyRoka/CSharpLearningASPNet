@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WebSampleApp.Controllers;
 using WebSampleApp.Middleware;
@@ -15,6 +16,10 @@ namespace WebSampleApp
 {
     public class Startup
     {
+        public Startup(IConfiguration configuration) => Configuration = configuration;
+
+        public IConfiguration Configuration { get; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -51,6 +56,31 @@ namespace WebSampleApp
                 homeApp.Run(async context => 
                 {
                     await context.Response.WriteAsync("Hello in the path".Div());
+                });
+            });
+
+            PathString remainingPath; // out var is not possible when used in lambda expression that follows with the next parameter
+            app.MapWhen(context => context.Request.Path.StartsWithSegments("/Configuration", out remainingPath), configurationApp =>
+            {
+                configurationApp.Run(async context =>
+                {
+                    var configSample = app.ApplicationServices.GetService<ConfigurationSample>();
+                    if (remainingPath.StartsWithSegments("/appsettings"))
+                    {
+                        await configSample.ShowApplicationSettingsAsync(context);
+                    }
+                    else if (remainingPath.StartsWithSegments("/colons"))
+                    {
+                        await configSample.ShowApplicationSettingsUsingColonsAsync(context);
+                    }
+                    else if (remainingPath.StartsWithSegments("/database"))
+                    {
+                        await configSample.ShowConnectionStringSettingAsync(context);
+                    }
+                    else if (remainingPath.StartsWithSegments("/stronglytyped"))
+                    {
+                        await configSample.ShowApplicationSettingsStronglyTyped(context);
+                    }
                 });
             });
 

@@ -19,6 +19,10 @@ namespace WebSampleApp
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+                .UseStartup<Startup>()
+                .ConfigureAppConfiguration(configure =>
+                {
+                    configure.AddXmlFile("appsettings.xml", optional: true);
+                });
     }
 }
